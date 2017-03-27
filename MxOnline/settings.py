@@ -12,9 +12,16 @@ https://docs.djangoproject.com/en/1.10/ref/settings/
 """
 
 import os
+# 因为我们把app都放到了apps,所以我们需要定义一下apps的搜索路径，使用 sys.path.insert
+import sys
+
+
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+# 第一个参数是搜索位置，第二个参数是使用Base_DIR和app拼成一个路径
+sys.path.insert(0, os.path.join(BASE_DIR, 'apps'))
+sys.path.insert(1, os.path.join(BASE_DIR, 'extra_apps'))
 
 
 # Quick-start development settings - unsuitable for production
@@ -28,7 +35,6 @@ DEBUG = True
 
 ALLOWED_HOSTS = []
 
-
 # Application definition
 
 INSTALLED_APPS = [
@@ -39,6 +45,11 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'users',
+    'courses',
+    'organization',
+    'operation',
+    'xadmin',
+    'crispy_forms',
 ]
 
 AUTH_USER_MODEL = 'users.UserProfile'
@@ -55,11 +66,22 @@ MIDDLEWARE = [
 
 ROOT_URLCONF = 'MxOnline.urls'
 
+TEMPLATE_CONTEXT_PROCESSORS = (
+    "django.contrib.auth.context_processors.auth",
+    "django.core.context_processors.debug",
+    "django.core.context_processors.i18n",
+    "django.core.context_processors.media",
+    "django.core.context_processors.static",
+    "django.core.context_processors.request",
+    "django.core.context_processors.tz",
+    "django.contrib.messages.context_processors.messages",
+    "django_facebook.context_processors.facebook"
+)
+
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
-        'DIRS': [os.path.join(BASE_DIR, 'templates')]
-        ,
+        'DIRS': [os.path.join(BASE_DIR, 'templates')],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
@@ -112,15 +134,21 @@ AUTH_PASSWORD_VALIDATORS = [
 # Internationalization
 # https://docs.djangoproject.com/en/1.10/topics/i18n/
 
-LANGUAGE_CODE = 'en-us'
+# LANGUAGE_CODE = 'en-us'
+LANGUAGE_CODE = 'zh-hans'
 
-TIME_ZONE = 'UTC'
+# TIME_ZONE = 'UTC'
+TIME_ZONE = 'Asia/shanghai'
+
 
 USE_I18N = True
 
 USE_L10N = True
 
-USE_TZ = True
+# USE_TZ = True
+#不使用全球时间，使用本地时间
+USE_TZ = False
+
 
 
 # Static files (CSS, JavaScript, Images)
