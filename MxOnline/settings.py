@@ -53,6 +53,10 @@ INSTALLED_APPS = [
 ]
 
 AUTH_USER_MODEL = 'users.UserProfile'
+# 重写后端认证方法
+AUTHENTICATION_BACKENDS =(
+    'users.views.CustomBackend',
+)
 
 MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
@@ -66,17 +70,17 @@ MIDDLEWARE = [
 
 ROOT_URLCONF = 'MxOnline.urls'
 
-TEMPLATE_CONTEXT_PROCESSORS = (
-    "django.contrib.auth.context_processors.auth",
-    "django.core.context_processors.debug",
-    "django.core.context_processors.i18n",
-    "django.core.context_processors.media",
-    "django.core.context_processors.static",
-    "django.core.context_processors.request",
-    "django.core.context_processors.tz",
-    "django.contrib.messages.context_processors.messages",
-    "django_facebook.context_processors.facebook"
-)
+# TEMPLATE_CONTEXT_PROCESSORS = (
+#     "django.contrib.auth.context_processors.auth",
+#     "django.core.context_processors.debug",
+#     "django.core.context_processors.i18n",
+#     "django.core.context_processors.media",
+#     "django.core.context_processors.static",
+#     "django.core.context_processors.request",
+#     "django.core.context_processors.tz",
+#     "django.contrib.messages.context_processors.messages",
+#     "django_facebook.context_processors.facebook"
+# )
 
 TEMPLATES = [
     {
@@ -155,3 +159,6 @@ USE_TZ = False
 # https://docs.djangoproject.com/en/1.10/howto/static-files/
 
 STATIC_URL = '/static/'
+STATICFILES_DIRS = [
+    os.path.join(BASE_DIR, "static"),
+]
