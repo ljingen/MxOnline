@@ -1,0 +1,39 @@
+
+6-3 自定义authenticate 实现覆盖djago自带的这个方法
+
+1、我们需要先到项目的settings.py里面，加入AUTHENTICATION_BACKENDS = （）这样就会重写后台认证方法
+2、我们在View里面，新建一个类， class CustomBackend(ModelBackend),其中ModelBackend为
+from django.contrib.auth.backends import ModelBackend
+3\ 在这里，我们重写 authenticate,我们先从数据库获取到user:
+   user = UserProfile .object.get(Q(username=username) | Q(email = username))
+   知识点：Q 为支持并集查询的类，可以从 django.db.models import Q拿到
+                  | 这个为查询是否有这个用户名或者邮箱名是这个输入字符
+4、然后根据用户名对密码进行验证：
+   if user.check_password(password)
+   这个时候如果用户名 密码是正确，就返回user,否则就返回None
+
+ 6-4 用Class继承view实现登录
+
+1、在实际工作中，我们处理基本用类，不在view里面定义方法，我们接下来就使用 LoginView来替换 login方法
+2、我们先引入 from django.views.generic.base import View
+3、定义类 Class LoginView (View)来实现对View的继承，同时我们重写了
+    def get(self,request):
+	doing
+    def post(self,request):
+      doing
+4、我们需要到项目的url文件中，先引入 LoginView，然后 在url映射表中，添加   LoginView.as_view()，记住需要加 () ，因为要获得句柄
+
+6-5用from实现登录
+
+1、定义LoginForm 的类,继承forms里面的Form，需要from django import forms,在LoginForm里面，对应的username password必须和html里面的form名字一直
+2、在LoginView里面，定义login_form = LoginForm(request.POST)，这样就把html里面的Form表单的值取到了 login_form里面
+3、首先进行login_form.is_valid()，如果数据干净的进行下面逻辑，如果数据不干净会报出错误
+4、我们可以用字典直接返回表单的报错，例如
+   return render(request,'login.html',{'login_form':login_form})，字典中，前面一个是web使用的参数，后面一个是本次返回的参数
+5、在html页面里面我们可以用 {% if login_form.errors.username %}  errorput{%endif%} 来控制当username这个输入框出错时，我们就加一个高亮的显示
+6、在html页面里面，有个显示错误的input展示框，我们可以使用
+  {% for key,error  in  login_item.errors.items %}
+      {{error}}
+{% endfor %}来控制具体显示什么错误
+
+

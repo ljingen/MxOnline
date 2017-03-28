@@ -50,8 +50,16 @@ INSTALLED_APPS = [
     'operation',
     'xadmin',
     'crispy_forms',
+    'captcha',
 ]
-
+# 配置邮件附送服务器
+EMAIL_HOST = 'smtp.aliyun.com'
+EMAIL_PORT = '25'
+EMAIL_HOST_USER = 'luojingen@aliyun.com'
+EMAIL_HOST_PASSWORD = 'luo1380126'
+EMAIL_USE_TLS = False
+EMAIL_FROM = 'luojingen@aliyun.com'
+#配置用户验证方式为调用自己的UserProfile里面的验证方式
 AUTH_USER_MODEL = 'users.UserProfile'
 # 重写后端认证方法
 AUTHENTICATION_BACKENDS =(

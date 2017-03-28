@@ -2,9 +2,14 @@
 from django.shortcuts import render
 from django.contrib.auth import authenticate, login
 from django.contrib.auth.backends import ModelBackend
+from django.contrib.auth.hashers import make_password
 from django.db.models import Q
+from django.views.generic.base import View
+
+from users.models import UserProfile,EmailVerifyRecord
+from users.forms import LoginFrom, RegisterForm
+from utils.email_send import send_register_email
 # Create your views here.
-from users.models import UserProfile
 
 
 class CustomBackend(ModelBackend):
@@ -17,6 +22,71 @@ class CustomBackend(ModelBackend):
             return None
 
 
+class RegisterView(View):
+    def get(self, request):
+        register_form = RegisterForm()
+        return render(request, 'register.html', {'register_form': register_form})
+
+    def post(self, request):
+        register_form = RegisterForm(request.POST)
+        if register_form.is_valid():
+            '''从post中获取到emal和password的值'''
+            user_name = request.POST.get('email', '')
+            pass_word = request.POST.get('password', '')
+            '''实例化一个UserProfile对象'''
+            user_profile = UserProfile()
+
+            user_profile.username = user_name
+            user_profile.email = user_name
+            user_profile.password = make_password(pass_word)
+            user_profile.is_active = False
+            '''将用户注册信息保存到数据库'''
+            user_profile.save()
+            '''发送认证邮件'''
+            send_register_email(user_name, 'register')
+            return render(request, 'login.html')
+        else:
+            return render(request, 'register.html', {'register_form': register_form})
+
+
+class ActiveView(View):
+
+    def get(self, request, active_code):
+        all_codes = EmailVerifyRecord.objects.filter(code=active_code)
+        user = UserProfile()
+        if all_codes:
+            for recode in all_codes:
+                email = recode.email
+                user = UserProfile.objects.get(email=email)
+                user.is_active =True
+                user.save()
+        return render(request, 'login.html', {'msg': '已经激活成功，请登陆','login_form': user})
+
+
+class LoginView(View):
+
+    def get(self, request):
+        return render(request, 'login.html', {})
+
+    def post(self, request):
+        login_from = LoginFrom(request.POST)
+        if login_from.is_valid():
+            user_name = request.POST.get('username', '')
+            pass_word = request.POST.get('password', '')
+            user = authenticate(username=user_name, password=pass_word)
+            if user is not None:
+                if user.is_active:
+                    login(request, user)
+                    return render(request, 'index.html')
+                else:
+                    return render(request, 'login.html', {'msg': '账号未激活,请进入邮箱激活账户!','login_from':login_from} )
+            else:
+                return render(request, 'login.html', {'msg': '用户名或密码错误,请重试!'})
+        else:
+            print 'hello'
+            return render(request, 'login.html', {'login_form': login_from})
+
+"""
 def user_login(request):
     if request.method == 'POST':
         user_name = request.POST.get('username', '')
@@ -29,3 +99,4 @@ def user_login(request):
             return render(request, 'login.html', {'msg': '用户名或密码错误,请重试!'})
     elif request.method == 'GET':
         return render(request, 'login.html', {})
+"""
