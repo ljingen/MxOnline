@@ -36,4 +36,10 @@ from django.contrib.auth.backends import ModelBackend
       {{error}}
 {% endfor %}来控制具体显示什么错误
 
-
+7-4 课程机构列表数据展现
+1、在具体的展示列表的数据，使用 {% for object in Objects %} 具体代码 {% endfor %}
+2、如果在html页面里面实现突破的展示，我么如何将数据库里面的img展示到页面上？
+   # 配置文件上传的默认根路径，需要在setting里面加入如下配置文件
+        MEDIA_URL = '/media/'
+        MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
+   # 在html

@@ -48,9 +48,10 @@ INSTALLED_APPS = [
     'courses',
     'organization',
     'operation',
-    'xadmin',
+    'xadmin',  # 后台xadmin管理服务器
     'crispy_forms',
-    'captcha',
+    'captcha',  # 验证码
+    'pure_pagination',  # 分页器
 ]
 # 配置邮件附送服务器
 EMAIL_HOST = 'smtp.aliyun.com'
@@ -101,6 +102,8 @@ TEMPLATES = [
                 'django.template.context_processors.request',
                 'django.contrib.auth.context_processors.auth',
                 'django.contrib.messages.context_processors.messages',
+                # 1.10版本就是这个media模块  1.9版本是django.core.context_processors.media
+                'django.template.context_processors.media',
             ],
         },
     },
@@ -117,9 +120,9 @@ DATABASES = {
         'ENGINE': 'django.db.backends.mysql',
         'NAME': 'mxonline',
         'USER': 'root',
-        'PASSWORD':'123456',
-        'HOST':'127.0.0.1',
-        'PORT':'3306',
+        'PASSWORD': '123456',
+        'HOST': '127.0.0.1',
+        'PORT': '3306',
     }
 }
 
@@ -158,7 +161,7 @@ USE_I18N = True
 USE_L10N = True
 
 # USE_TZ = True
-#不使用全球时间，使用本地时间
+# 不使用全球时间，使用本地时间
 USE_TZ = False
 
 
@@ -170,3 +173,8 @@ STATIC_URL = '/static/'
 STATICFILES_DIRS = [
     os.path.join(BASE_DIR, "static"),
 ]
+
+
+# 配置文件上传的默认根路径，需要在setting里面加入如下配置文件
+MEDIA_URL = '/media/'
+MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
