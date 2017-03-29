@@ -19,7 +19,7 @@ from django.views.generic import TemplateView
 import xadmin
 
 # from users.views import user_login
-from users.views import LoginView, RegisterView, ActiveView
+from users.views import LoginView, RegisterView, ActiveView, ForgetPwdView, ResetView, ModifyPwdView
 xadmin.autodiscover()
 
 urlpatterns = [
@@ -30,4 +30,7 @@ urlpatterns = [
     url(r'^login/$', LoginView.as_view(), name='login'),
     url(r'^register/$', RegisterView.as_view(), name='register'),
     url(r'^active/(?P<active_code>[-\w]+)/$', ActiveView.as_view(), name='user_active'),
+    url(r'^forget/$', ForgetPwdView.as_view(), name='forget'),
+    url(r'^reset/(?P<reset_code>[-\w]+)/$', ResetView.as_view(), name='reset_pwd'),
+    url(r'^modify_pwd/$', ModifyPwdView.as_view(), name='modify_pwd'),
 ]

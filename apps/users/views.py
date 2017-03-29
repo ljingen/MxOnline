@@ -6,8 +6,8 @@ from django.contrib.auth.hashers import make_password
 from django.db.models import Q
 from django.views.generic.base import View
 
-from users.models import UserProfile,EmailVerifyRecord
-from users.forms import LoginFrom, RegisterForm
+from users.models import UserProfile, EmailVerifyRecord
+from users.forms import LoginFrom, RegisterForm, ForgetForm, ModifyPwdForm
 from utils.email_send import send_register_email
 # Create your views here.
 
@@ -32,6 +32,9 @@ class RegisterView(View):
         if register_form.is_valid():
             '''从post中获取到emal和password的值'''
             user_name = request.POST.get('email', '')
+            '''用户是否注册'''
+            if UserProfile.objects.filter(email=user_name):
+                return render(request, 'register.html', {'register_form': register_form, 'msg': '用户已经存在'})
             pass_word = request.POST.get('password', '')
             '''实例化一个UserProfile对象'''
             user_profile = UserProfile()
@@ -46,7 +49,7 @@ class RegisterView(View):
             send_register_email(user_name, 'register')
             return render(request, 'login.html')
         else:
-            return render(request, 'register.html', {'register_form': register_form})
+            return render(request, 'register.html', {'register_form': register_form, 'msg':'用户已存在'})
 
 
 class ActiveView(View):
@@ -60,7 +63,11 @@ class ActiveView(View):
                 user = UserProfile.objects.get(email=email)
                 user.is_active =True
                 user.save()
-        return render(request, 'login.html', {'msg': '已经激活成功，请登陆','login_form': user})
+            return render(request, 'login.html', {'msg': '已经激活成功，请登陆','login_form': user})
+        else:
+            '''还没做'''
+            return render(request, 'active_fail.html', {})
+        return render(request,'login.html', {})
 
 
 class LoginView(View):
@@ -86,17 +93,52 @@ class LoginView(View):
             print 'hello'
             return render(request, 'login.html', {'login_form': login_from})
 
-"""
-def user_login(request):
-    if request.method == 'POST':
-        user_name = request.POST.get('username', '')
-        pass_word = request.POST.get('password', '')
-        user = authenticate(username=user_name, password=pass_word)
-        if user is not None:
-            login(request, user)
-            return render(request, 'index.html', {})
+
+class ForgetPwdView(View):
+
+    def get(self, request):
+        forget_form = ForgetForm()
+        return render(request, 'forgetpwd.html', {'forget_form': forget_form})
+
+    def post(self, request):
+        forget_form = ForgetForm(request.POST)
+        if forget_form.is_valid():
+            email = request.POST.get('email', '')
+            '''发送找回密码的邮件'''
+            send_register_email(email, 'forget')
+            return render(request, 'send_success.html')
         else:
-            return render(request, 'login.html', {'msg': '用户名或密码错误,请重试!'})
-    elif request.method == 'GET':
-        return render(request, 'login.html', {})
-"""
+            return render(request, 'forgetpwd.html', {'forget_form': forget_form, 'msg': '表格信息错误'})
+
+
+class ResetView(View):
+
+    def get(self, request, reset_code):
+        all_codes = EmailVerifyRecord.objects.filter(code=reset_code)
+        user = UserProfile()
+        if all_codes:
+            for recode in all_codes:
+                email = recode.email
+                return render(request, 'password_reset.html', {'email': email})
+        else:
+            '''还没做'''
+            return render(request, 'active_fail.html', {})
+        return render(request,'login.html', {})
+
+
+class ModifyPwdView(View):
+    def post(self, request):
+        modifypwd_form = ModifyPwdForm(request.POST)
+        if modifypwd_form.is_valid():
+            pwd1 = request.POST.get('password1', '')
+            pwd2 = request.POST.get('password2', '')
+            email = request.POST.get('email', '')
+            if pwd1 != pwd2:
+                return render(request, 'password_reset.html', {'modifypwd_form': modifypwd_form, 'email': email, 'msg': '密码不一致!'})
+            user = UserProfile.objects.get(email=email)
+            user.password = make_password(pwd1)
+            user.save()
+            return render(request, 'login.html', {'msg': '密码已经修改,请用新密码登录'})
+        else:
+            email = request.POST.get('email', '')
+            return render(request, 'password_reset.html', {'modifypwd_form': modifypwd_form, 'email': email, 'msg': '信息错误,请重试!'})
