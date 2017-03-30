@@ -30,7 +30,15 @@ class CourseOrg(models.Model):
     detail = models.TextField(verbose_name=u'机构介绍')
     fav_nums = models.IntegerField(default=0, verbose_name=u'收藏人数')
     click_num = models.IntegerField(default=0, verbose_name=u'点击数')
+
+    students = models.IntegerField(default=0, verbose_name=u'学习人数')
+    course_nums = models.IntegerField(default=0, verbose_name=u'课程数')
+
     add_time = models.DateTimeField(default=datetime.now, verbose_name=u'添加时间')
+    category = models.CharField(max_length=10,
+                                choices=(('pxjg', u'培训机构'), ('gr', u'个人讲师'), ('gx', u'高等院校')),
+                                default='pxjg',
+                                verbose_name='类别')
 
     class Meta:
         verbose_name = u'机构'

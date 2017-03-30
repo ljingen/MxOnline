@@ -39,7 +39,81 @@ from django.contrib.auth.backends import ModelBackend
 7-4 课程机构列表数据展现
 1、在具体的展示列表的数据，使用 {% for object in Objects %} 具体代码 {% endfor %}
 2、如果在html页面里面实现突破的展示，我么如何将数据库里面的img展示到页面上？
-   # 配置文件上传的默认根路径，需要在setting里面加入如下配置文件
-        MEDIA_URL = '/media/'
-        MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
-   # 在html
+如果需要将后台存储的图片展示到HTML中，需要经过以下步骤：
+1. 将image的路径地址 从数据库中 取出来，传递到html中
+2. 在settings中配置处理media的templates模板和media路径
+3. 配置image的url, 需要import static模块中的serve方法
+Setting里面的设置：
+TEMPLATES = [
+    {
+        'BACKEND': 'django.template.backends.django.DjangoTemplates',
+        'DIRS': [os.path.join(BASE_DIR, 'templates')]
+        ,
+        'APP_DIRS': True,
+        'OPTIONS': {
+            'context_processors': [
+                'django.template.context_processors.debug',
+                'django.template.context_processors.request',
+                'django.contrib.auth.context_processors.auth',
+                'django.contrib.messages.context_processors.messages',
+                'django.template.context_processors.media'　　# 1.10版本就是这个media模块  1.9版本是django.core.context_processors.media
+            ],
+        },
+    },
+]
+
+MEDIA_URL = "/media/"
+MEDIA_ROOT = os.path.join(BASE_DIR, "media")
+urls.py中的配置
+该url专门处理media路径访问
+from django.views.static import serve
+url(r'^media/(?P<path>.*)/$', serve, {"document_root": MEDIA_ROOT}),
+
+7-5 实现页面的分页
+ 1、先安装pip install django-pure-pagination
+ 2、根据他的教程，把pure-pagination加入到app里面
+ 3、在view里面 ，引入包里面几个View，
+ 4、view实现如下代码
+           try:
+            page = request.GET.get('page', 1)
+        except PageNotAnInteger:
+            # If page is not an integer, deliver first page.
+            page = 1
+        paginator = Paginator(all_courseorg, 5, request=request)  # 获取一共有多少个页面
+        all_orgs = paginator.page(page)  # 拿到指定的分页
+ 5、在html里面，加入代码，实现分页
+                             {% if all_orgs.has_previous %} #如果 有上一页，那么久显示上一页
+                                <li class="long"><a href="?{{ all_orgs.previous_page_number.querystring }}">上一页</a></li>
+                            {% endif %}
+
+                            {% for page in all_orgs.pages %}  便利all_orgs里面的分解，并列出来，如果当前页数和服务器页数一直，增加active
+                                {% if page %}
+                                    {% ifequal page all_orgs.number %}
+                                        <li class="active"><a href="?{{ page.querystring }}">{{ page }}</a></li>
+                                    {% else %}
+                                        <li><a href="?{{ page.querystring }}" class="page">{{ page }}</a></li>
+                                    {% endifequal %}
+                                {% else %}
+                                    <li class="none"><a href="">...</a></li>
+                                {% endif %}
+                            {% endfor %}
+
+                            {% if all_orgs.has_next %} 如果有下一个，列出下一页
+                                <li class="long"><a href="?{{ all_orgs.next_page_number.querystring }}">下一页</a></li>
+                            {% endif %}
+
+7-7 url的分发机制
+
+1、进入到项目的url文件，配置url文件如下：
+    url(r'^org/', include('organization.urls', namespace='org')),
+   其中org为url列表第一条访问信息，后面include 第一个参数，为要定位的 app里面的url，namespace是定义的命名空间，这样，找url将只到对应这个命名
+   空间的app里面找
+2、进入到app里面，创建一个urls.py的文件，引入：
+   from django.conf.urls import url, include
+    并写入url配置，如下：
+urlpatterns = [
+    url(r'^list/$', OrgListView.as_view(), name='orglist'),
+]
+3、进入到html中，这里是base，找到授课机构，在href里面配置{% url 'org:orglist'%}
+  这里org是命名的空间，后面的orglist是对应的app里面的name
+ 这样我们就可以用  /list/list/来访问到这个url了。

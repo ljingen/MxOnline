@@ -37,8 +37,8 @@ urlpatterns = [
     url(r'^forget/$', ForgetPwdView.as_view(), name='forget'),
     url(r'^reset/(?P<reset_code>[-\w]+)/$', ResetView.as_view(), name='reset_pwd'),
     url(r'^modify_pwd/$', ModifyPwdView.as_view(), name='modify_pwd'),
-    #机构列表
-    url(r'^orglist/$', OrgListView.as_view(), name='orglist'),
-    #配置如何在html页面里面去加载静态的media文件
+    # 机构 列表的url配置
+    url(r'^org/', include('organization.urls', namespace='org')),
+    # 配置如何在html页面里面去加载静态的media文件
     url(r'^media/(?P<path>.*)/$', serve, {'document_root': MEDIA_ROOT}),
 ]
