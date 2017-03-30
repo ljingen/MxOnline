@@ -117,3 +117,65 @@ urlpatterns = [
 3、进入到html中，这里是base，找到授课机构，在href里面配置{% url 'org:orglist'%}
   这里org是命名的空间，后面的orglist是对应的app里面的name
  这样我们就可以用  /list/list/来访问到这个url了。
+
+ 7-8 进行我要学习数据表的提交--ModelForm
+ 1、如果表单字段和数据库 字段相同，可以直接使用ModeForm，使用方式为
+    class Meta:
+    model =UserAsk
+    fields = ['fileds' , 'field2' ....]
+ 2、在View里面，可以直接实例化
+    useraskform = UserAskForm(request.Post)
+    if user_ask_form .is_valid():
+       user_ask_form.save()
+ 3、因为涉及到动态提交，当前页面不刷新，所以使用ajax技术，ajax的脚本如下：
+      <script>
+        $(function(){
+            $('#jsStayBtn').on('click', function(){
+                $.ajax({
+                    cache: false,
+                    type: "POST",
+                    url:"{% url 'org:user_ask' %}",
+                    data:$('#jsStayForm').serialize(),
+                    async: true,
+                    success: function(data) {
+                        if(data.status == 'success'){
+                            $('#jsStayForm')[0].reset();
+                            alert("你已提交成功")
+                        }else if(data.status == 'fail'){
+                            $('#jsCompanyTips').html(data.msg)
+                        }
+                    },
+                });
+            });
+        })
+    </script>
+    同时，在view返回的时候不能 直接render,应该返回jaso格式数据，使用的是
+     return HttpResponse("{'status':'success','msg':'已经提交成功'}"，content-type='application/json')
+    第一个是json格式的数据，第二个是content-type参数
+  4、自定义数据校验的时候，我们使用 def clean_arg:的形式，获取表单的数据我们使用  arg = self.cleaned_date['moile'],代码如下：
+         def clean_mobile(self):
+        ''''
+        验证手机号码是否合法,
+        自定义的数据验证，必须以clean开头的方法，另外在调用数据采用sele.cleaned_data['arg']形式
+        :return:
+        '''
+        mobile = self.cleaned_data['mobile']
+        REGEX_MOBILE = "^1[358]\d{9}$|^147\d{8}$|^176\d{8}$"
+        p = re.compile(REGEX_MOBILE)
+        if p.match(mobile):
+            return mobile
+        else:
+            raise forms.ValidationError(u'手机号码非法', code='mobile_invalid')
+   其中rase是抛出验证的异常信息
+ 5、 自己写的时候，发生了一个错误，我在url里面，写的 UserAskView.as_view()，没有加后面的()，导致报错 系统只要1个参数，但实际给了2个参数。
+
+ 7-8 实现列表详情页
+
+ 1、模板导入，观察模板，发现需要重新建立一个新的模板 org_base.html，并将相应的块设置为block
+ 2、url 配置，因为详情需要url带入参数, url = (r'^org_home/(?p<org_id>\d+)/$' ,OrgHomeView.as_view(),name = org_home)
+ 3、编写view, a)定义get方法，-->获取org_id，根据org_id 实例一个Org，然后查到Org的所有课程，
+     这里因为Course 里面设置了一个course_org的外键，所以从course_org里面，可以使用反向查询，查询方式为
+     course_org_conse_set()获得3个课程 用django的 all_course = org.couse_set()[:3]实现
+    根据org,获取所有的teacher
+
+ 4、

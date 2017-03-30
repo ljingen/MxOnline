@@ -22,6 +22,7 @@ class CityDict(models.Model):
 
 
 class CourseOrg(models.Model):
+
     city = models.ForeignKey(CityDict,verbose_name=u'所属城市')
     name = models.CharField(max_length=50, verbose_name=u'机构名称', default=u'')
     desc = models.CharField(max_length=300, verbose_name=u'机构描述')
@@ -49,7 +50,7 @@ class CourseOrg(models.Model):
 
 
 class Teacher(models.Model):
-    org = models.ForeignKey(CourseOrg,verbose_name=u'所属机构')
+    org = models.ForeignKey(CourseOrg, verbose_name=u'所属机构')
     name = models.CharField(max_length=50, verbose_name=u'教师名称', default=u'')
     desc = models.CharField(max_length=300, verbose_name=u'教师描述')
     work_years = models.CharField(max_length=10, verbose_name= u'工作年限')

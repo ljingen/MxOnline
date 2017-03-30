@@ -37,7 +37,7 @@ class CourseComments(models.Model):
 class UserFavorite(models.Model):
     """用户收藏的课程表"""
     user = models.ForeignKey(UserProfile, verbose_name=u'用户')
-    fav_id = models.IntegerField(default=0, verbose_name=u'数据id')
+    fav_id = models.IntegerField(default=0, verbose_name=u'数据id')  # 收藏机构就是机构的id，收藏课程及时课程id，教师就是教师id
     fav_type = models.CharField(
         choices=(
             (1, '课程'),

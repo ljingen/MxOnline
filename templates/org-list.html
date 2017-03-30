@@ -62,13 +62,13 @@
                        {% for courseorg in all_orgs.object_list %}
                         <dl class="des difdes">
                             <dt>
-                                <a href="org-detail-homepage.html">
+                                <a href="{% url 'org:org_home' courseorg.id %}">
                                     <img width="180" height="120" class="scrollLoading" data-url="{{ MEDIA_URL }}{{ courseorg.image }}"/>
                                 </a>
                             </dt>
                             <dd>
                                 <div class="clearfix">
-                                     <a href="org-detail-homepage.html">
+                                     <a href="{% url 'org:org_home' courseorg.id %}">
                                          <h1>{{ courseorg.name }}</h1>
                                          <div class="pic fl">
                                              <img src="{% static 'images/authentication.png' %}"/>
@@ -123,7 +123,7 @@
                     <form class="rightform" id="jsStayForm">
                         <div>
                             <img src="{% static 'images/rightform1.png' %}"/>
-                            <input type="text" name="name" id="companyName" placeholder="名字" maxlength="25" />
+                            <input type="text" name="user" id="companyName" placeholder="名字" maxlength="25" />
                         </div>
                         <div>
                             <img src="{% static 'images/rightform2.png' %}"/>
@@ -135,7 +135,7 @@
                         </div>
                         <p class="error company-tips" id="jsCompanyTips"></p>
                         <input class="btn" type="text" id="jsStayBtn" value="立即咨询 >" />
-                    <input type='hidden' name='csrfmiddlewaretoken' value='5I2SlleZJOMUX9QbwYLUIAOshdrdpRcy' />
+                        {% csrf_token %}
                     </form>
                 </div>
 
@@ -153,4 +153,28 @@
             </div>
         </div>
     </section>
+{% endblock %}
+
+{% block custom_js %}
+    <script>
+        $(function(){
+            $('#jsStayBtn').on('click', function(){
+                $.ajax({
+                    cache: false,
+                    type: "POST",
+                    url:"{% url 'org:user_ask' %}",
+                    data:$('#jsStayForm').serialize(),
+                    async: true,
+                    success: function(data) {
+                        if(data.status == 'success'){
+                            $('#jsStayForm')[0].reset();
+                            alert("你已提交成功")
+                        }else if(data.status == 'fail'){
+                            $('#jsCompanyTips').html(data.msg)
+                        }
+                    },
+                });
+            });
+        })
+    </script>
 {% endblock %}
