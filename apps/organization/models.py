@@ -45,6 +45,10 @@ class CourseOrg(models.Model):
         verbose_name = u'机构'
         verbose_name_plural = verbose_name
 
+    def get_teacher_nums(self):
+        """返回当前机构所含的教师数量"""
+        return self.teacher_set.all().count()
+
     def __unicode__(self):
         return self.name
 

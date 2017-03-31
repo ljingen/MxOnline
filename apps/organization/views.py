@@ -47,7 +47,7 @@ class OrgListView(View):
         all_orgs = paginator.page(page)  # 拿到指定的分页
 
         return render(request, 'org-list.html', {
-            'all_orgs': all_orgs,  # 分页选择器
+            'all_orgs': all_orgs,  # 分页选择器，传过去之后需要有一个变量 object_list获取里面的对象
             'all_city': all_city,
             'courseorg_num': courseorg_num,
             'city_id': city_id,
@@ -163,8 +163,9 @@ class OrgTeacherView(View):
         all_teacher = course_org.teacher_set.all()
         # 判读用户是否已经收藏了
         hav_fav = False
-        if UserFavorite.objects.filter(user=request.user, fav_id=course_org.id, fav_type=2):
-            hav_fav = True
+        if request.user.is_authenticated:
+            if UserFavorite.objects.filter(user=request.user, fav_id=course_org.id, fav_type=2):
+                hav_fav = True
 
         return render(request, 'org-detail-teachers.html', {
             'all_teacher': all_teacher,  # 当前机构的所有教师

@@ -29,6 +29,7 @@ class UserProfile(AbstractUser):
     image = models.ImageField(max_length=100, upload_to='image/%Y/%M/%D', default=u'image/default.png',verbose_name=u'用户头像')
     sign = models.CharField(max_length=100, verbose_name='个性签名', null=True, blank=True,default=u'这家伙很懒,什么都没留下')
     classroom = models.CharField(max_length=2, verbose_name='班级', null=True, blank=True)
+
     class Meta:
         verbose_name = u'用户信息'
         verbose_name_plural = verbose_name

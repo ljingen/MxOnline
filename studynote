@@ -177,5 +177,58 @@ urlpatterns = [
      这里因为Course 里面设置了一个course_org的外键，所以从course_org里面，可以使用反向查询，查询方式为
      course_org_conse_set()获得3个课程 用django的 all_course = org.couse_set()[:3]实现
     根据org,获取所有的teacher
+****************************************************
+如果定义  Course(models.Model):
+                      a = models.CharField()
+                B(models.Model):
+                      c= models.ForeignKey(Course)
+                      s= models.CharFiled()
+已知course，访问course 下面的所有b，使用 course.b_set.all()
+已知b，查b的 c里面的a,使用  b.cous_id.a
+已知b，差s ,使用b.s
+已知s，查b，使用B.object.filter(s=s)
+已知表里面的c，查b，使用 course.object.filter(id=c)，查出course，再根据course.b_set.all()查b
+*****************************************************
+#html和view之间的几个传值方式
+****************************************************
+通过href传值：href = xxx/?sort=zxxx&filter=xxx  在view直接用request.GET.get('sort')捕获
+通过命名空间传值:  {% url  ''org:hell'  xxx  xxxx %} 这这个地方需要在view里面定义对应的方法 如 def(request,xxx ,xxx) 来获取参数
+通过urls里面配置捕获参数  url(r'sort/(?p<sort_hot>[\d])/$' , hello, name = 'hello'),那么在匹配的时候，也需要在方法里面接收这个参数  def  hell0(request ,srot_hot)
+****************************************************
+#实现点击数+1
+****************************************************
 
- 4、
+在course里面增加一个click_nums的字段
+在course .view.CourseDetailView里面实现
+       def get(self,request,couse_id)
+        """从数据库获取所有课程"""
+        course = Course.objects.get(id=int(course_id))
+        #  增加课程点击数
+        course.click_num += 1
+        course.save()
+这样每个课程被点击一次，就会增加一次点击
+===========================================================
+#在model里面直接实现对子表进行查询统计
+============================================================
+需求:我们需要根据couse，对当前couse的lesson和couseuser进行统计展示
+背景:couse是总表，lesson有一个指向couse的外键，UserCourse也有一个指向couse的外键
+实现: 利用子表可以用 _set来进行访问的特性
+    在couse表，定义方法，来返回
+   def  get_zj_nums(self):
+      return self.lesson_set.all().counts()
+=============================================================
+#根据一个课程，列出相关课程
+===============================================================
+需求:在课程的详情页，列出相关课程
+实现：
+数据库增加tag字段，
+在view里面，先取出当前课程tag，然后在Course里面，根据tag进行过滤
+        #根据tag来进行对应的可能还喜欢
+        tag = course.tag
+        if tag:
+            relate_courses = Course.objects.filter(tag =tag)[:1]
+        else:
+            relate_courses = []
+然后将relate_courses返回给前端页面
+==================================================================
+#

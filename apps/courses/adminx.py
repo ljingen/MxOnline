@@ -22,7 +22,8 @@ class VideoAdmin(object):
 
 class CourseResourceAdmin(object):
     pass
-xadmin.site.register(Video, VideoAdmin)
-xadmin.site.register(Lesson, LessonAdmin)
+
 xadmin.site.register(Course, CourseAdmin)
+xadmin.site.register(Lesson, LessonAdmin)
+xadmin.site.register(Video, VideoAdmin)
 xadmin.site.register(CourseResource, CourseResourceAdmin)
