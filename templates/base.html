@@ -54,16 +54,16 @@
                     <div class="nav">
                         <div class="wp">
                             <ul>
-                                <li ><a href="index.html">首页</a></li>
-                                <li >
-                                    <a href="course-list.html">
+                                <li {% if request.path == '/' %}class="active"{% endif %}><a href="{% url 'index' %}">首页</a></li>
+                                <li {% if request.path|slice:'8' == '/course/' %}class="active"{% endif %}>
+                                    <a href="{% url 'course:courselist' %}">
                                         公开课<img class="hot" src="{% static 'images/nav_hot.png' %}">
                                     </a>
                                 </li>
-                                <li >
-                                    <a href="teachers-list.html">授课教师</a>
+                                <li {% if request.path|slice:'13' == '/org/teacher/' %}class="active"{% endif %} >
+                                    <a href="{% url 'org:teacher_list' %}">授课教师</a>
                                 </li>
-                                <li class="active" ><a href="{% url 'org:orglist' %}">授课机构</a></li>
+                                <li {% if request.path|slice:'10' == '/org/list/' %}class="active"{% endif %} ><a href="{% url 'org:orglist' %}">授课机构</a></li>
                             </ul>
                         </div>
                     </div>
@@ -275,35 +275,13 @@
                 </dd>
                 <div class="buy start_groupbuy jsShowPerfect2" data-id="22"><br/>联系<br/>服务</div>
             </dl>
-            
 		</div>
 		 <div class="pageturn">
             <ul class="pagelist">
-                
-
-                
-                    
-                        
-                            <li class="active"><a href="?page=1">1</a></li>
-                        
-                    
-                
-                    
-                        
-                            <li><a href="?page=2" class="page">2</a></li>
-                        
-                    
-                
-                    
-                        
-                            <li><a href="?page=3" class="page">3</a></li>
-                        
-                    
-                
-                
-                    <li class="long"><a href="?page=2">下一页</a></li>
-                
-
+                <li class="active"><a href="?page=1">1</a></li>
+                <li><a href="?page=2" class="page">2</a></li>
+                <li><a href="?page=3" class="page">3</a></li>
+                <li class="long"><a href="?page=2">下一页</a></li>
             </ul>
         </div>
 		</div>

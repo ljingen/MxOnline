@@ -33,6 +33,9 @@ class CourseComments(models.Model):
         verbose_name = u'课程评论'
         verbose_name_plural = verbose_name
 
+    def __unicode__(self):
+        return self.user.nick_name
+
 
 class UserFavorite(models.Model):
     """用户收藏的课程表"""

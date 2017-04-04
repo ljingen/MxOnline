@@ -11,7 +11,7 @@ from django.db import models
 class UserProfile(AbstractUser):
     # 性别选择器
     SEX_IN_USER_CHOICES = (
-        ('MAN', u'男'),
+        ('MALE', u'男'),
         ('FEMALE', u'女'),
     )
     nick_name = models.CharField(
@@ -23,7 +23,7 @@ class UserProfile(AbstractUser):
         max_length=6,
         verbose_name=u'性别',
         choices=SEX_IN_USER_CHOICES,
-        default='MAN')
+        default='MALE')
     address = models.CharField(max_length=100, verbose_name=u'地址', default=u'')
     mobile = models.CharField(max_length=11, verbose_name='手机号', null=True, blank=True)
     image = models.ImageField(max_length=100, upload_to='image/%Y/%M/%D', default=u'image/default.png',verbose_name=u'用户头像')

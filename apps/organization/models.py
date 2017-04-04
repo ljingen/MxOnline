@@ -60,7 +60,7 @@ class Teacher(models.Model):
     work_years = models.CharField(max_length=10, verbose_name= u'工作年限')
     work_company = models.CharField(max_length=10, verbose_name=u'就职公司')
     work_position = models.CharField(max_length=10, verbose_name=u'就职职位')
-    age = models.CharField(max_length=10, verbose_name=u'年龄')
+    age = models.IntegerField(default=0, verbose_name=u'年龄')
     image = models.ImageField(upload_to='organization/%Y/%M/%D', verbose_name=u'头像', default='organization/default.png')
     fav_nums = models.IntegerField(default=0, verbose_name=u'收藏人数')
     click_num = models.IntegerField(default=0, verbose_name=u'点击数')

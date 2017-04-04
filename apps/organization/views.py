@@ -5,6 +5,7 @@ from django.views.generic.base import View
 from pure_pagination import Paginator, EmptyPage, PageNotAnInteger  # 引入分页器
 from .models import CityDict, CourseOrg, Teacher
 from courses.models import Course
+from django.db.models import Q
 from .forms import UserAskFrom
 from operation.models import UserFavorite
 # Create your views here.
@@ -18,7 +19,12 @@ class OrgListView(View):
 
         '''取出热门城市列表，利用django的筛选功能'''
         hot_courseorg = all_courseorg.order_by('-click_num')[:5]
-
+        '''根据关键字进行搜索'''
+        search_keywords = request.GET.get('keywords','')
+        if search_keywords:
+            all_courseorg = all_courseorg.filter(Q(name__icontains=search_keywords) |
+                                                 Q(desc__icontains=search_keywords) |
+                                                 Q(detail__icontains=search_keywords))
         '''城市筛选功能'''
         city_id = request.GET.get('city', '')
         if city_id:
@@ -202,3 +208,72 @@ class AddFavView(View):
             user_fav.fav_type = int(fav_type)
             user_fav.save()
             return HttpResponse('{"status": "success","msg":"已收藏","name":"金刚狼"}', content_type='application/json')
+
+
+class TeacherListView(View):
+
+    def get(self, request):
+
+        all_teachers = Teacher.objects.all()
+
+        hot_teachers = Teacher.objects.all().order_by('-click_num')[:5]
+        '''根据关键字进行搜索'''
+        search_keywords = request.GET.get('keywords','')
+        if search_keywords:
+            all_teachers = all_teachers.filter(Q(name__icontains=search_keywords) |
+                                                 Q(desc__icontains=search_keywords) |
+                                                 Q(points__icontains=search_keywords))
+
+        '''按照类别进行排序'''
+        sort = request.GET.get('sort', '')
+        if sort:
+            if sort == 'hot':
+                all_teachers = all_teachers.order_by('-click_num')
+        '''处理页面分页'''
+        try:
+            page = request.GET.get('page', 1)
+        except PageNotAnInteger:
+            # If page is not an integer, deliver first page.
+            page = 1
+        paginator = Paginator(all_teachers, 10, request=request)  # 获取一共有多少个页面
+        all_teachers = paginator.page(page)  # 拿到指定的分页
+
+        return render(request, 'teachers-list.html', {
+            'all_teachers': all_teachers,  # 获取所有的教师列表，返回给前端处理
+            'sort': sort,  # 返回按照热度进行排序
+            'hot_teachers': hot_teachers,  # 返回当前热门的教师列表，按照点击数进行排行，返回5个
+        })
+
+
+class TeacherDetailView(View):
+
+    def get(self, request, teacher_id):
+
+        current_page = 'teacher'  # 用作判断当前是访问哪个页面
+
+        teacher = Teacher.objects.get(id=int(teacher_id))
+
+        hot_teachers = Teacher.objects.all().order_by('-click_num')[:5]
+
+        # 方法1，因为ourse有一个外键指向Teacher表，所以可以用teacher.course_set来找到当前教师所有课程
+        teacher_courses = teacher.course_set.all();
+
+        #  方法2,因为course里面有一个teacher字段，所以可以直接从course表里面查询所有教师是teacher的课程
+        teacher_courses = Course.objects.filter(teacher=teacher)
+
+        #  判断用户是否已经收藏
+        has_fav_teacher = False
+        has_fav_organization = False
+        if UserFavorite.objects.filter(user=request.user, fav_id=teacher.id, fav_type=3):
+            has_fav_teacher = True
+        if UserFavorite.objects.filter(user=request.user, fav_id=teacher.org.id, fav_type=2):
+            has_fav_organization = True
+
+        return render(request, 'teacher-detail.html', {
+            'teacher': teacher,  # 根据传进来的教师id，获取教师信息
+            'teacher_courses': teacher_courses,  # 返回当前教师的所有课程信息
+            'hot_teachers': hot_teachers,  # 返回当前热门教师
+            'has_fav_teacher': has_fav_teacher,  # 返回收藏教师信息
+            'has_fav_organization': has_fav_organization,  # 返回收藏机构信息
+
+        })

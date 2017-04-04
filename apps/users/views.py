@@ -9,6 +9,8 @@ from django.views.generic.base import View
 from users.models import UserProfile, EmailVerifyRecord
 from users.forms import LoginFrom, RegisterForm, ForgetForm, ModifyPwdForm
 from utils.email_send import send_register_email
+from utils.mixin_utils import LoginRequiredMixin
+
 # Create your views here.
 
 
@@ -142,3 +144,11 @@ class ModifyPwdView(View):
         else:
             email = request.POST.get('email', '')
             return render(request, 'password_reset.html', {'modifypwd_form': modifypwd_form, 'email': email, 'msg': '信息错误,请重试!'})
+
+
+class UserinfoView(LoginRequiredMixin, View):
+    """
+    用户个人中心处理view
+    """
+    def get(self, request):
+        return  render(request, 'usercenter-info.html', {})

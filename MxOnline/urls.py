@@ -41,6 +41,8 @@ urlpatterns = [
     url(r'^org/', include('organization.urls', namespace='org')),
     # 课程 列表的url配置
     url(r'^course/', include('courses.urls', namespace='course')),
+    # 用户 列表的url配置
+    url(r'^users/', include('users.urls', namespace='users')),
     # 配置如何在html页面里面去加载静态的media文件
     url(r'^media/(?P<path>.*)/$', serve, {'document_root': MEDIA_ROOT}),
 ]

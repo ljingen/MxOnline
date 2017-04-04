@@ -231,4 +231,27 @@ urlpatterns = [
             relate_courses = []
 然后将relate_courses返回给前端页面
 ==================================================================
-#
+#实现学过这门课程的人还学过功能
+===================================================================
+首先根据course_id取出在Course表里面的 实例
+course =Course.object.filter(id = int(course_id))
+第二:根据course，在UserCourse中取出所有学习了这门课程的UserCourse的表的记录
+user_courses = UserCourse.object.filter(course = course)
+第三：根据这个记录，在UserCourse表中，取出所有的用户id
+user_ids = [user_course.user.id for user_course in user_courses]
+第四：根据这个id列表，我们取出这些用户学习的所有课程列表 (因为user是外键，所以可以用user_id来访问user的id)
+all_user_course = UserCourse.objects.filter(user_id__in =user_ids)
+第五:根据查询出来的那些用户学习的所有列表，我们再将course_id给取出来
+course_ids = [user_course.course.id for user_course in all_user_course]
+第六步:我们根据这个course_id，获取到学习了这个课程的用户还学过其他课程的列表
+relate_course = Courses.objects.filter(id__in= course_ids).order_by('-click-nums')[:5]
+====================================================================
+#实现首页的全局导航
+=====================================================================
+第一步:根据view的传值会第一步先传入到base模板，同时，其他各个页面均继承自base模板，所以我们对base的导航
+进行配置
+第二步:我们先对base的导航，加入具体的每个模板的链接，使用 {% url '链接地址''%} 实现对具体页面的跳转
+
+第三步:我们在具体的li里面，通过 {% if request.path| slice:'N' == 'pagename' %}进行判断
+   其中request.path将获得当前页面的相对路径，slice为过滤器，实现对url的过滤， N为要取得的字符
+   pagename为要匹配的地址，例如：{% if request.path|slice:'3'=='/course/list/'% }
