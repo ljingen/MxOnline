@@ -1,9 +1,12 @@
 # -*- coding: utf-8 -*-
 from __future__ import unicode_literals
 from datetime import datetime
+import DjangoUeditor
 
 from django.utils import timezone
 from django.db import models
+
+from DjangoUeditor.models import UEditorField
 from organization.models import CourseOrg, Teacher
 
 # Create your models here.
@@ -14,7 +17,18 @@ class Course(models.Model):
     teacher = models.ForeignKey(Teacher, verbose_name=u'任课教师', null=True, blank=True, default='')
     name = models.CharField(max_length=50, verbose_name=u'课程名', default=u'')
     desc = models.CharField(max_length=300, verbose_name=u'课程描述')
-    detail = models.TextField(verbose_name=u'课程详情')
+    detail = UEditorField(verbose_name=u'课程详情	',
+                          width=600,
+                          height=300,
+                          toolbars="normal",
+                          imagePath="course/ueditor/",
+                          filePath="course/ueditor/",
+                          upload_settings={"imageMaxSize": 1204000},
+                          settings={},
+                          command=None,
+                          blank=True,
+                          default='')
+    is_banner = models.BooleanField(default=False, verbose_name= u'是否轮播')
     degree = models.CharField(max_length=5, choices=(('cj', u'初级'), ('zj', u'中级'), ('gj', u'高级'),), verbose_name=u'难度')
     learn_times = models.IntegerField(default=0, verbose_name=u'学习时长')
     students = models.IntegerField(default=0, verbose_name=u'学习人数')
@@ -51,6 +65,15 @@ class Course(models.Model):
     def __unicode__(self):
         return self.name
 
+'''
+继承自Course，管理轮播图课程
+关键知识点是  proxy必须设置
+'''
+class BannerCourse(Course):
+    class Meta:
+        verbose_name = u'课程轮播图'
+        verbose_name_plural = verbose_name
+        proxy = True
 
 class Lesson(models.Model):
     course = models.ForeignKey(Course, verbose_name=u'课程')

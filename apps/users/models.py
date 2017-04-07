@@ -11,8 +11,8 @@ from django.db import models
 class UserProfile(AbstractUser):
     # 性别选择器
     SEX_IN_USER_CHOICES = (
-        ('MALE', u'男'),
-        ('FEMALE', u'女'),
+        ('male', u'男'),
+        ('female', u'女'),
     )
     nick_name = models.CharField(
         max_length=50,
@@ -23,7 +23,7 @@ class UserProfile(AbstractUser):
         max_length=6,
         verbose_name=u'性别',
         choices=SEX_IN_USER_CHOICES,
-        default='MALE')
+        default='male')
     address = models.CharField(max_length=100, verbose_name=u'地址', default=u'')
     mobile = models.CharField(max_length=11, verbose_name='手机号', null=True, blank=True)
     image = models.ImageField(max_length=100, upload_to='image/%Y/%M/%D', default=u'image/default.png',verbose_name=u'用户头像')
@@ -37,11 +37,16 @@ class UserProfile(AbstractUser):
     def __unicode__(self):
         return self.username
 
+    def get_msg_nums(self):
+        from operation.models import UserMessage
+        message_nums = UserMessage.objects.filter(user=self.id).count()
+        return  message_nums
+
 
 class EmailVerifyRecord(models.Model):
     code = models.CharField(max_length=20, verbose_name=u'验证码')
     email = models.EmailField(max_length=50, verbose_name=u'邮箱')
-    send_type = models.CharField(choices=(('register', u'注册'), ('course_orgcourse_orgcourse_orgcourse_orgcourse_orgcourse_orgcourse_orgcourse_orgcourse_orgcourse_org', u'找回密码')), max_length=10, verbose_name='验证码类型')
+    send_type = models.CharField(choices=(('register', u'注册'), ('forget', u'找回密码'), ('update', u'更改邮箱')), max_length=10, verbose_name='验证码类型')
     send_time = models.DateTimeField(default=timezone.now, verbose_name=u'发送时间')
 
     class Meta:

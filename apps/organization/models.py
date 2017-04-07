@@ -32,6 +32,7 @@ class CourseOrg(models.Model):
     fav_nums = models.IntegerField(default=0, verbose_name=u'收藏人数')
     click_num = models.IntegerField(default=0, verbose_name=u'点击数')
 
+    tag = models.CharField(max_length=10, verbose_name=u'机构标签', default=u'全国知名')
     students = models.IntegerField(default=0, verbose_name=u'学习人数')
     course_nums = models.IntegerField(default=0, verbose_name=u'课程数')
 
@@ -70,6 +71,10 @@ class Teacher(models.Model):
     class Meta:
         verbose_name = u'教师'
         verbose_name_plural = verbose_name
+
+    def get_course_nums(self):
+        """返回当前机构所含的教师数量"""
+        return self.course_set.all().count()
 
     def __unicode__(self):
         return self.name

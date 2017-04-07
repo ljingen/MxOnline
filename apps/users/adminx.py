@@ -40,7 +40,6 @@ class BannerAdmin(object):
     list_display = ['title', 'image', 'url', 'index', 'add_time']
     search_fields = ['title']
     list_filter = ['title', 'image', 'url', 'index', 'add_time']
-    model_icon = 'fa fa-user'
 
 # xadmin.site.unregister(User)
 # xadmin.site.register(UserProfile, UserProfileAdmin)

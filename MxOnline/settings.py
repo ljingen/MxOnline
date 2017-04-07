@@ -31,9 +31,9 @@ sys.path.insert(1, os.path.join(BASE_DIR, 'extra_apps'))
 SECRET_KEY = '9*9_1(%*tp(eep*f^ez^t!(5^iybx4*rv+#ekv5%y8)$l@fcp5'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
 
-ALLOWED_HOSTS = []
+DEBUG = True
+ALLOWED_HOSTS = ['*']
 
 # Application definition
 
@@ -52,6 +52,7 @@ INSTALLED_APPS = [
     'crispy_forms',
     'captcha',  # 验证码
     'pure_pagination',  # 分页器
+    'DjangoUeditor',  # 安装djangoUeditor编辑器
 ]
 # 配置邮件附送服务器
 EMAIL_HOST = 'smtp.aliyun.com'
@@ -153,7 +154,7 @@ AUTH_PASSWORD_VALIDATORS = [
 LANGUAGE_CODE = 'zh-hans'
 
 # TIME_ZONE = 'UTC'
-TIME_ZONE = 'Asia/shanghai'
+TIME_ZONE = 'Asia/Shanghai'
 
 
 USE_I18N = True
@@ -173,7 +174,7 @@ STATIC_URL = '/static/'
 STATICFILES_DIRS = [
     os.path.join(BASE_DIR, "static"),
 ]
-
+# STATIC_ROOT = os.path.join(BASE_DIR, "static")
 
 # 配置文件上传的默认根路径，需要在setting里面加入如下配置文件
 MEDIA_URL = '/media/'

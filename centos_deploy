@@ -1,0 +1,129 @@
+第一步:python2.6升级到2.7
+http://blog.csdn.net/jcjc918/article/details/11022345
+第二步：安装虚拟机
+
+第三步：安装nginx
+sudo apt-get install nginx
+http://www.cnblogs.com/hanyinglong/p/5102141.html
+http://www.cnblogs.com/dennisit/p/4069521.html
+
+第四步:安装mysql
+sudo apt-get install mysql-server
+
+第五步:配置Mysql
+ a.找到配置文件 vim /etc/mysql/mysql.conf.d/mysql.cnf，添加bind-address后面增加远程访问IP地址或者禁掉这句话就可以让远程机登陆访问
+ b.执行service mysql restart重启数据库
+ c.执行以下命令开启远程访问限制  grant all privileges on *.* to 'root'@'192.168.0.1' identified by 'password' with grant option;  flush privileges;  exit
+上面的是开启的IP 192.168.0.1的，如要开启所有的，用%代替IP
+http://blog.csdn.net/fhxpp_27/article/details/8442555
+关闭远程访问:
+use mysql;
+
+update user set host = "localhost" where user = "root" and host= "%";
+
+flush privileges;
+第五步:安装vitrualenv
+pip install virtualenv
+pip install virtualenvwrapper
+
+第六步:创建虚拟环境
+a . root# virtualenv --no-site-packages mxonline
+b.启动 source /mxonline/bin/activate
+c.关闭 deactivate
+
+第七步: 拷贝本地环境到服务器环境
+a. 在本地执行 pip freeze >requirements.txt
+b. 拷贝本地内容，然后在服务器上也建立一个 requestments.txt
+c.执行  pip install -r requirements.txt  这样执行从服务器文件安装
+
+第八步：安装uwsgi
+a.pip install uwsgi
+安装后 uwsgi 启动命令: 进入到 MxOnline的项目目录里面，其中 命令行的MxOnline是一个根路径
+uwsgi —http :8080 —module MxOnline.wsge
+b.上传自己的文件包 到 /home/bobby/mnt/
+scp MxOnline.zip root@115.29.47.86:/home/bobby/mnt/
+
+c.  验证失败解决办法
+1.修改 /etc/ssh/ssh_config  (用此方法时，一定要保证，两台机器之间是可信任的)
+添加如下两行代码  StrictHostKeyChecking no  UserKnownHostsFile /dev/null
+重启sshd服务  service sshd restart  或者  /etc/init.d/sshd restart
+
+第九步: 启动配置uwsgi相关 ，
+a.uwsgi —http :8000 —module Mxonline.wsgi
+
+第十步：配置nginx
+a.进入到项目路径 /home/bobby/mnt/MxOnline/conf  ,
+b.vim uc_nginx.conf,写入下面文件
+
+# the upstream component nginx needs to connect to
+upstream django {
+# server unix:///path/to/your/mysite/mysite.sock; # for a file socket
+server 127.0.0.1:8787; # for a web port socket (we'll use this first)
+}
+# configuration of the server
+
+server {
+# the port your site will be served on
+listen      80;
+# the domain name it will serve for
+server_name www.mxonline.com; # substitute your machine's IP address or FQDN
+charset     utf-8;
+
+# max upload size
+client_max_body_size 75M;   # adjust to taste
+
+# Django media
+location /media  {
+    alias /home/bobby/mnt/MxOnline/media;  # 指向django的media目录
+}
+
+location /static {
+    alias /home/bobby/mnt/MxOnline/static; # 指向django的static目录
+}
+
+# Finally, send all non-media requests to the Django server.
+-- INSERT --
+
+c.把这个配置文件链接到 nginx的配置文件里面
+拷贝的方法：cp uc_nginx.conf /etc/nginx/conf.d/
+d.重启一下nginx
+service nginx restart
+
+e.配置static_root并收集静态文件
+
+进入MxOnline/setting.py， 添加
+STATIC_URL = '/static/'
+#STATICFILES_DIRS = [
+#    os.path.join(BASE_DIR, "static"),
+#]
+STATIC_ROOT = os.path.join(BASE_DIR, "static")
+
+执行：python manage.py collectstatic
+
+将所有的配置文件放入到静态文件，这样nginx就可以使用
+
+第十一步：配置uwsgi
+配置：# mysite_uwsgi.ini file
+[uwsgi]
+
+# Django-related settings
+# the base directory (full path)
+chdir           = /home/bobby/mnt/MxOnline
+# Django's wsgi file
+module          = MxOnline.wsgi
+# the virtualenv (full path)
+
+# process-related settings
+# master
+master          = true
+# maximum number of worker processes
+processes       = 10
+# the socket (use the full path to be safe
+socket          = 127.0.0.1:8787
+# ... with appropriate permissions - may be needed
+# chmod-socket    = 664
+# clear environment on exit
+vacuum          = true
+virtualenv = /mxonline
+
+ 启动 ：uwsgi -i ./conf/uwsgi.ini

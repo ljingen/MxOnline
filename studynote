@@ -255,3 +255,146 @@ relate_course = Courses.objects.filter(id__in= course_ids).order_by('-click-nums
 第三步:我们在具体的li里面，通过 {% if request.path| slice:'N' == 'pagename' %}进行判断
    其中request.path将获得当前页面的相对路径，slice为过滤器，实现对url的过滤， N为要取得的字符
    pagename为要匹配的地址，例如：{% if request.path|slice:'3'=='/course/list/'% }
+======================================================================
+#实现用户修改头像的操作
+=======================================================================
+第一步:配置url，设置url为 url(r'^image/updaload/$', UploadImageView.as_view(), name='image_upload'),
+第二步:进入到页面里面，配置页面，
+<form class="clearfix" id="jsAvatarForm" enctype="multipart/form-data" autocomplete="off" method="post"
+action="/users/image/upload/" target='frameFile'>
+其中关键信息为  enctype="multipart/form-data"，这个是代表本次提交的是一个文件
+action 的地址为用户提交的url地址 :{% url 'users:image_upload' %}
+第三步:我们开始编写views，先实例化form
+upload_image_form = UploadImageForm(request.POST, request.FILES)
+这里还有一种用户，upload_image_form = UploadImageForm(request.POST, request.FILES,
+instances=request.user )
+这样，我们就可以直接使用 upload_image_form.save()进行保存
+这里取值，有个注意的，文件取值 用的是request.FILES
+第四步:判断upload_image_form.is_valid()，如果文件正确，我们使用
+image = upload_image_form.cleaned_data['image']取出图片，并放到user中
+request.user.image = image
+第五步:保存user，request.user.save()
+============================================================================
+#Font-awesome的使用和替换
+============================================================================
+第一步.在xadmin.py里面，给需要替换自定义图标的管理器，加上    model_icon = 'fa fa-user'
+这样这个图标就会有文件;
+第二步.如果需要最新的font-awesome，可以进入官网http://fontawesome.io/#modal-download进行下载
+第三步.下载结束后，将文件解压缩，拷贝解压缩文件夹里面的css和fonts
+第四步.进入到xadmin--static --vendor--font-awesome，将拷贝文件覆盖到这里，就可以实现最新的
+图标了。
+=============================================================================
+#xadmin里面对数据进行排序的操作
+=============================================================================
+第一步.进入到需要进行排序的管理器，如xadmin.py---->CourseAdmin
+第二步.ordering = ['-click_num'] 这样就会按照点击数逆序排列
+==============================================================================
+#xadmin里面对数据进行不可编辑操作
+==============================================================================
+第一步.进入到需要进行排序的管理器，如xadmin.py---->CourseAdmin
+第二步.在管理器写入 readonly_fields = ['click_num', 'fav_nums']，那么这两个参数就是
+只读状态
+==============================================================================
+#xadmin里面对数据进行不显示操作
+==============================================================================
+第一步.进入到需要进行排序的管理器，如xadmin.py---->CourseAdmin
+第二步.在管理器写入 exclude = ['click_num', 'fav_nums']，那么这两个参数就不会显示了
+第三步.readonly_fields和exclude是冲突的，只有一个会生效
+==============================================================================
+#xadmin里面对数据进外键 由选择变为搜索
+==============================================================================
+第一步.进入到需要进行排序的管理器，如xadmin.py---->CourseAdmin
+第二步.例如我们准备对课程机构进行搜索，那么我们需要进入到课程机构的管理器，CourseOrgAdmin
+第三步.在CourseOrgAdmin里面增加  relfield_style = 'fk_ajax',这是课程外键就可以搜索了
+==============================================================================
+#xadmin 自定义列表返回数据，同一个model注册两个管理器
+==============================================================================
+第一步.进入到需要一个model注册多个管理器的admin里面，如xadmin.py---->CourseAdmin
+第二步.定义一个装配器
+class LessionInline(object):
+    model = Lesson
+    extra = 0
+第三步.进入到管理器组装。
+class CourseAdmin(object):
+    list_display = ['name', 'desc', 'detail', 'degree', 'learn_times', 'students', 'fav_nums', 'add_time']
+    search_fields = ['name', 'degree']
+    list_filter = ['name', 'desc', 'detail', 'degree', 'learn_times', 'students', 'fav_nums', 'add_time']
+    ordering = ['-click_num']
+    readonly_fields = ['click_num', 'fav_nums']
+
+    inlines =[LessionInline]
+==============================================================================
+#xadmin 实现同一个表在两个管理器进行管理
+==============================================================================
+第一步.我们继承Course实现一个新的models，在Meta里面标记上，他是一个proxy=True
+'''
+继承自Course，管理轮播图课程
+关键知识点是  proxy必须设置
+'''
+class BannerCourse(Course):
+    class Meta:
+        verbose_name = u'课程轮播图'
+        verbose_name_plural = verbose_name
+        proxy = True
+第二步.进入到adminx.py，定义lass BannerCourseAdmin(object):
+class BannerCourseAdmin(object):
+    list_display = ['name', 'desc', 'detail', 'degree', 'learn_times', 'students', 'fav_nums', 'add_time']
+    search_fields = ['name', 'degree']
+    list_filter = ['name', 'desc', 'detail', 'degree', 'learn_times', 'students', 'fav_nums', 'add_time']
+    ordering = ['-click_num']
+    readonly_fields = ['click_num', 'fav_nums']
+
+    inlines = [LessionInline]
+
+第三步.注册这个管理器
+xadmin.site.register(BannerCourse, BannerCourseAdmin)
+==============================================================================
+#xadmin 对管理器进行过滤显示
+==============================================================================
+    '''
+    对父Course进行过滤，找到是banner的表
+    '''
+    def queryset(self):
+        qs = super(BannerCourseAdmin,self).queryset()
+        qs = qs.filter(is_banner=True)
+        return qs
+==============================================================================
+#xadmin 安装django Ueditor
+==============================================================================
+1.进入到github官网，然后找到Ueditor，选择download源码
+2.解压缩源码文件，找到Ueditor复制到我们项目的extra_apps目录
+3.进入到我们的setting里面，把DjangoUeditor添加到INSTALLED_APPS中
+    'DjangoUeditor',  # 安装djangoUeditor编辑器
+4.配置编辑器
+     import extra_apps.DjangoUeditor
+    #  配置django Ueditor的编辑器
+    url(r'^ueditor/', include('DjangoUeditor.urls')),
+5.进入到具体的models，可以将原来的TextField更改，
+    import DjangoUeditor
+    detail = UEditorField(verbose_name=u'课程详情	',
+                          width=600,
+                          height=300,
+                          toolbars="full"
+                          imagePath="course/ueditor/",
+                          filePath="course/ueditor/",
+                          upload_settings={"imageMaxSize": 1204000},
+                          settings={},
+                          command=None,
+                          blank=True,
+                          default='')
+6.进入到具体的Course的管理器中，添加如下代码
+    style_fields = {'detail':'ueditor'}
+7.因为django会将富文本自动转义，所以我们再进入到模板里面，把autoescape 关闭掉
+                {% autoescape off %}
+                {{ course.detail }}
+                {% endautoescape %}
+==============================================================================
+#xadmin 安装--方式2从 github安装
+==============================================================================
+1.进入到github官网，然后找到xadmin，选择download源码
+2.解压缩源码文件，找到xadmin复制到我们项目的根目录
+3.在xadmin之上新建一个extra_apps,表示这里存储第三方源码包，并把xadmin放到该文件夹下面，并make
+sourceroot
+4.之后我们就可以直接定义url就可以了。
+
+

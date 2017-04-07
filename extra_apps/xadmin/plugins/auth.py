@@ -16,7 +16,9 @@ from xadmin.layout import Fieldset, Main, Side, Row, FormHelper
 from xadmin.sites import site
 from xadmin.util import unquote
 from xadmin.views import BaseAdminPlugin, ModelFormAdminView, ModelAdminView, CommAdminView, csrf_protect_m
+from django.contrib.auth import  get_user_model
 
+User = get_user_model()
 
 ACTION_NAME = {
     'add': _('Can add %s'),
@@ -114,7 +116,6 @@ class PermissionAdmin(object):
 
     model_icon = 'fa fa-lock'
     list_display = ('show_name', )
-
 site.register(Group, GroupAdmin)
 site.register(User, UserAdmin)
 site.register(Permission, PermissionAdmin)
@@ -258,7 +259,14 @@ class ChangeAccountPasswordView(ChangePasswordView):
         else:
             return self.get_response()
 
-site.register_view(r'^auth/user/(.+)/password/$',
+'''
+2017年4月
+更改用户更改密码
+'''
+# site.register_view(r'^auth/user/(.+)/password/$',
+#                    ChangePasswordView, name='user_change_password')
+
+site.register_view(r'^users/userprofile/(.+)/password/$',
                    ChangePasswordView, name='user_change_password')
 site.register_view(r'^account/password/$', ChangeAccountPasswordView,
                    name='account_password')
