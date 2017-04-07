@@ -1,6 +1,6 @@
-
-6-3 自定义authenticate 实现覆盖djago自带的这个方法
-
+=====================================================================================================
+#6-3 自定义authenticate 实现覆盖djago自带的这个方法
+=====================================================================================================
 1、我们需要先到项目的settings.py里面，加入AUTHENTICATION_BACKENDS = （）这样就会重写后台认证方法
 2、我们在View里面，新建一个类， class CustomBackend(ModelBackend),其中ModelBackend为
 from django.contrib.auth.backends import ModelBackend
@@ -11,9 +11,9 @@ from django.contrib.auth.backends import ModelBackend
 4、然后根据用户名对密码进行验证：
    if user.check_password(password)
    这个时候如果用户名 密码是正确，就返回user,否则就返回None
-
- 6-4 用Class继承view实现登录
-
+=====================================================================================================
+ #6-4 用Class继承view实现登录
+=====================================================================================================
 1、在实际工作中，我们处理基本用类，不在view里面定义方法，我们接下来就使用 LoginView来替换 login方法
 2、我们先引入 from django.views.generic.base import View
 3、定义类 Class LoginView (View)来实现对View的继承，同时我们重写了
@@ -22,9 +22,9 @@ from django.contrib.auth.backends import ModelBackend
     def post(self,request):
       doing
 4、我们需要到项目的url文件中，先引入 LoginView，然后 在url映射表中，添加   LoginView.as_view()，记住需要加 () ，因为要获得句柄
-
-6-5用from实现登录
-
+=====================================================================================================
+#6-5用from实现登录
+=====================================================================================================
 1、定义LoginForm 的类,继承forms里面的Form，需要from django import forms,在LoginForm里面，对应的username password必须和html里面的form名字一直
 2、在LoginView里面，定义login_form = LoginForm(request.POST)，这样就把html里面的Form表单的值取到了 login_form里面
 3、首先进行login_form.is_valid()，如果数据干净的进行下面逻辑，如果数据不干净会报出错误
@@ -35,8 +35,9 @@ from django.contrib.auth.backends import ModelBackend
   {% for key,error  in  login_item.errors.items %}
       {{error}}
 {% endfor %}来控制具体显示什么错误
-
-7-4 课程机构列表数据展现
+=====================================================================================================
+#7-4 课程机构列表数据展现
+=====================================================================================================
 1、在具体的展示列表的数据，使用 {% for object in Objects %} 具体代码 {% endfor %}
 2、如果在html页面里面实现突破的展示，我么如何将数据库里面的img展示到页面上？
 如果需要将后台存储的图片展示到HTML中，需要经过以下步骤：
@@ -396,5 +397,10 @@ xadmin.site.register(BannerCourse, BannerCourseAdmin)
 3.在xadmin之上新建一个extra_apps,表示这里存储第三方源码包，并把xadmin放到该文件夹下面，并make
 sourceroot
 4.之后我们就可以直接定义url就可以了。
+==============================================================================
+#后台启动ugsgi
+==============================================================================
+启动命令 后面加上一个 &符号就会从后台启动
+uwsgi —http :8080 —module MxOnline.wsge &
 
 
