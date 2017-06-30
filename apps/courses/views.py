@@ -97,7 +97,7 @@ class CourseInfoView(LoginRequiredMixin, View):
         """用户点击课程后，查看用户是否已经学习过该课程"""
         user_courses = UserCourse.objects.filter(course=course)
         if not user_courses:
-            user_course = UserCourse(user = request.user, course=course)
+            user_course = UserCourse(user=request.user, course=course)
             user_course.save()
         """看过这门课程的同学还看过什么课程"""
         user_courses = UserCourse.objects.filter(course=course)
@@ -132,7 +132,7 @@ class CourseCommentsView(LoginRequiredMixin, View):
         """用户点击课程后，查看用户是否已经学习过该课程"""
         user_courses = UserCourse.objects.filter(course=course)
         if not user_courses:
-            user_course = UserCourse(user = request.user, course=course)
+            user_course = UserCourse(user=request.user, course=course)
             user_course.save()
         """看过这门课程的同学还看过什么课程"""
         user_courses = UserCourse.objects.filter(course=course)
