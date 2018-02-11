@@ -61,8 +61,10 @@ EMAIL_HOST_USER = 'luojingen@aliyun.com'
 EMAIL_HOST_PASSWORD = 'luo1380126'
 EMAIL_USE_TLS = False
 EMAIL_FROM = 'luojingen@aliyun.com'
+
 #配置用户验证方式为调用自己的UserProfile里面的验证方式
 AUTH_USER_MODEL = 'users.UserProfile'
+
 # 重写后端认证方法
 AUTHENTICATION_BACKENDS =(
     'users.views.CustomBackend',
@@ -164,7 +166,6 @@ USE_L10N = True
 # USE_TZ = True
 # 不使用全球时间，使用本地时间
 USE_TZ = False
-
 
 
 # Static files (CSS, JavaScript, Images)

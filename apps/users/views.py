@@ -26,8 +26,13 @@ from courses.models import Course
 
 
 class CustomBackend(ModelBackend):
+    """
+    custom the login backend,
+    overrite the authenticate method()
+    """
     def authenticate(self, username=None, password=None, **kwargs):
         try:
+            """验证username或者email"""
             user = UserProfile.objects.get(Q(username=username) | Q(email=username))
             if user.check_password(password):
                 return user
@@ -36,6 +41,11 @@ class CustomBackend(ModelBackend):
 
 
 class RegisterView(View):
+    """
+    user register the system
+    get():
+    post():
+    """
     def get(self, request):
         register_form = RegisterForm()
         return render(request, 'register.html', {'register_form': register_form})
@@ -114,7 +124,7 @@ class LoginView(View):
             else:
                 return render(request, 'login.html', {'msg': '用户名或密码错误,请重试!'})
         else:
-            print 'hello'
+            print ('hello')
             return render(request, 'login.html', {'login_form': login_from})
 
 
@@ -282,7 +292,7 @@ class MyFavOrgView(LoginRequiredMixin, View):
 
 class MyFavTeacherView(LoginRequiredMixin, View):
     """
-    我收藏的课程机构
+    我收藏的教师
     """
     def get(self, request):
         currentpage = 'favorite'
@@ -338,7 +348,7 @@ class MyMessageView(LoginRequiredMixin, View):
 
 class IndexView(View):
     '''
-    暮雪在线网首页视图
+    暮学在线网首页视图
     '''
     def get(self, request):
         all_banners = Banner.objects.all().order_by('index')
